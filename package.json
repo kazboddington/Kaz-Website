@@ -1,7 +1,7 @@
 {
-  "name": "scotch-react-router",
+  "name": "Zak's Website",
   "version": "1.0.0",
-  "description": "React Router Aricle for Scotch",
+  "description": "All of zak's web based projects",
   "main": "index.js",
   "scripts": {
     "watch": "webpack -d --watch",
@@ -9,7 +9,7 @@
     "serve": "serve ./public",
     "start": "nodemon"
   },
-  "author": "Christian Nwamba",
+  "author": "Zak Bonnington",
   "license": "MIT",
   "devDependencies": {
     "babel-loader": "^6.2.4",
