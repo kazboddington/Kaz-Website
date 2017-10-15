@@ -1,5 +1,5 @@
 {
-  "name": "Zak's Website",
+  "name": "Zak_Website",
   "version": "1.0.0",
   "description": "All of zak's web based projects",
   "main": "index.js",
@@ -23,6 +23,7 @@
     "babel-core": "^6.26.0",
     "express": "^4.14.0",
     "history": "^3.0.0",
+    "lodash": "^4.17.4",
     "react": "^15.3.0",
     "react-dom": "^15.3.0",
     "react-router": "^2.6.1"
