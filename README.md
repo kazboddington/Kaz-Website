@@ -1,2 +1,9 @@
-## Scotch React Todo
-A demo that backs a Scotch article on building a Todo App using React.
+## Zak's Website
+Various random projects that require a website to run. 
+
+
+GoofSpiel
+---------
+A node project. Clone the repo, install npde and run `node install`
+To get webpack converting that react: `node run watch`
+To host the site: `node start`
