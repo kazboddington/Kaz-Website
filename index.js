@@ -33,7 +33,9 @@ const newGameState = {
         currentBid: null
     },
     currentCards: [],
-    cardsToPlayFor:[1,2,3,4,5,6,7,8,9,10,11,12,13]
+    cardsToPlayFor:[1,2,3,4,5,6,7,8,9,10,11,12,13],
+    gameId: 0
+    
 }
 
 function getNewGame(){
@@ -43,6 +45,9 @@ function getNewGame(){
                 ]; 
     _.pull(newGame.cardsToPlayFor, newCard)
     newGame.currentCards.push(newCard)
+    if (gameState != undefined){
+        newGame.gameId += gameState.gameId + 1; 
+    }
     return newGame
 }
 
@@ -54,6 +59,7 @@ var gameState = getNewGame()
 
 app.get('/goofspiel/state', function (request, response){
     response.send(JSON.stringify(gameState))
+    //TODO change to clean state    
 })
 
 const requestFormat = 
@@ -79,8 +85,10 @@ function getCleanState(){
             hasBid: null
         },
         currentCards: gameState.currentCards,
-        cardsToPlayFor: gameState.cardsToPlayFor
+        cardsToPlayFor: gameState.cardsToPlayFor,
+        gameId: gameState.gameId
     }
+
      
     // Set the has bid variable
     if (gameState.zak.currentBid == null){
@@ -106,6 +114,7 @@ function endGame(){
     }else{
         console.log("Peter wins")        
     }
+    gameState = getNewGame()
 }
 
 function isNumeric(n) {
