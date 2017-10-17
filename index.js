@@ -21,6 +21,9 @@ app.get('/goofspiel', function (request, response){
     response.sendFile(path.resolve(__dirname, 'public', 'goofspiel.html'))
 })
 
+
+const results = []
+
 const newGameState = {
     zak:{
         cardsToPlay: [1,2,3,4,5,6,7,8,9,10,11,12,13],
@@ -53,13 +56,30 @@ function getNewGame(){
 
 var gameState = getNewGame()
 
-
-
-
-
 app.get('/goofspiel/state', function (request, response){
-    response.send(JSON.stringify(gameState))
-    //TODO change to clean state    
+    console.log(request.query)
+    
+    if (request.query.gameId == undefined){
+        // Did not request a specific game
+        response.send(JSON.stringify(getCleanState()))
+        return
+    }
+
+    console.log("A specfic game coming up ")
+    // Requested a specific game
+    if (!isNumeric(request.query.gameId)){
+        response.send("Your requested game was not a number: " + request.query.gameId)
+    }
+
+    var id = parseInt(request.query.gameId)
+    if (id < results.length){
+        // requested valid game 
+        response.send(results[id])
+    }else if (id == results.length){
+        response.send(getCleanState())
+    }else{
+        response.send("You requested an invalid game: " + request.query.gameId)
+    }
 })
 
 const requestFormat = 
@@ -109,11 +129,15 @@ function endGame(){
     console.log("Game ended")
     var totalZak = gameState.zak.cardsWon.reduce((tot, num) => tot + num, 0)
     var totalPeter = gameState.peter.cardsWon.reduce((tot, num) => tot + num, 0)
+    var finalState = _.cloneDeep(gameState)
     if(totalZak > totalPeter){
+        finalState.result = {winner: 'zak'}
         console.log("Zak wins")
     }else{
+        finalState.result = {winner: 'peter'}
         console.log("Peter wins")        
     }
+    results.push(finalState)
     gameState = getNewGame()
 }
 
@@ -202,20 +226,21 @@ app.post('/goofspiel/bid', function(req, res){
         }
 
 
-        if(gameState.cardsToPlayFor.length == 0){
+        
+        console.log("Completing move")
+        _.pull(player.cardsToPlay, player.currentBid)
+        _.pull(opponent.cardsToPlay, opponent.currentBid)
+        player.currentBid = null
+        opponent.currentBid = null
+        var newCard = gameState.cardsToPlayFor[ 
+                    Math.floor( Math.random() * gameState.cardsToPlayFor.length)
+                ]; 
+        gameState.currentCards.push(newCard)                
+        _.pull(gameState.cardsToPlayFor, newCard)
+
+        if(player.cardsToPlay.length == 0){
             console.log("Ending game")
             endGame()
-        }else{
-            console.log("Completing move")
-            _.pull(player.cardsToPlay, player.currentBid)
-            _.pull(opponent.cardsToPlay, opponent.currentBid)
-            player.currentBid = null
-            opponent.currentBid = null
-            var newCard = gameState.cardsToPlayFor[ 
-                        Math.floor( Math.random() * gameState.cardsToPlayFor.length)
-                    ]; 
-            gameState.currentCards.push(newCard)                
-            _.pull(gameState.cardsToPlayFor, newCard)
         }
     }else{
         console.log("Waiting for other player to bid")

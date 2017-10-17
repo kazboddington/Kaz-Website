@@ -3,6 +3,19 @@ import { render } from 'react-dom';
 
 console.clear();
 
+function isNumeric(n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
+}
+
+function formatParams( params ){
+  return "?" + Object
+        .keys(params)
+        .map(function(key){
+                  return key+"="+encodeURIComponent(params[key])
+                })
+        .join("&")
+}
+
 function httpGetAsync(theUrl, callback)
 {
     var xmlHttp = new XMLHttpRequest();
@@ -32,6 +45,7 @@ class CardList extends React.Component{
         console.log("called")
         this.props.postCardChoice(card)
     }
+
     render(){
         const listContainerStyle = {
             display:'flex', 
@@ -50,9 +64,18 @@ class CardList extends React.Component{
         
 
         const cardList = this.props.cards.map((number) =>
-            <div onClick={(e) => this.handleClick(number, e)} style={listItemStyle} key={number.toString()}>
-            {number}
-            </div>
+            {if (isNumeric(number)) {
+
+            return (
+                <div 
+                    onClick={(e) => this.handleClick(number, e)} 
+                    style={listItemStyle} 
+                    key={number.toString()}> 
+                {number} 
+                </div>)
+            }else{
+                return <div></div>
+            }}
         );
         return <div style={listContainerStyle}>{cardList}</div>
     }
@@ -65,10 +88,15 @@ class SidePanel extends React.Component{
     }
     render(){
         const cardList = this.props.currentCards.map((number) =>
-            <h3 key={number.toString()}>
-            {number}
-            </h3>
-        );
+            {if (isNumeric(number)) {
+                return 
+                    <h3 key={number.toString()}>
+                        {number}
+                    </h3>
+            }else{
+                return <div></div>
+            }
+            });
         var retVal = 
             <div className={`col-md-2 col-md-offset-2`}>
                 <h4>
@@ -89,7 +117,7 @@ class GoofBoard extends React.Component{
     }
 
     componentDidMount() {
-        httpGetAsync('/goofspiel/state', function(data) {
+        httpGetAsync('/goofspiel/state' + formatParams({gameId: 0}), function(data) {
             this.setState({data: JSON.parse(data)});
         }.bind(this));
     }
@@ -105,7 +133,7 @@ class GoofBoard extends React.Component{
             postRequestBody,
             function(data) {
                 console.log("Played")
-                httpGetAsync('/goofspiel/state', function(data) {
+                httpGetAsync('/goofspiel/state' + formatParams({gameId: 0}), function(data) {
                     this.setState({data: JSON.parse(data)});
                 }.bind(this));
         }.bind(this));
