@@ -39,6 +39,9 @@ function httpPostAsync(theUrl, body, callback)
     xmlHttp.send(body);
 }
 
+var gameNumber = 0;
+
+
 class CardList extends React.Component{
 
     handleClick(card, e){
@@ -50,19 +53,19 @@ class CardList extends React.Component{
         const listContainerStyle = {
             display:'flex', 
             flexWrap: 'wrap',
-            justifyContent:'space-between'
+            justifyContent:'flex-start'
         }
 
         const listItemStyle = {
-            width: 'calc(100% * (1/4))',
+            //width: 'calc(100% * 1/5 1)',
             textAlign: 'center',
             border: '1px black solid',
             flex: '0 0 21%',
+            marginRight: '1%',
             marginBottom: '1%',
             cursor: 'pointer'
         }
         
-
         const cardList = this.props.cards.map((number) =>
             {if (isNumeric(number)) {
 
@@ -94,13 +97,14 @@ class SidePanel extends React.Component{
                         {number}
                     </h3>
             }else{
-                return <div></div>
+                return <div> No cards </div>
             }
             });
         var retVal = 
             <div className={`col-md-2 col-md-offset-2`}>
                 <h4>
-                    Cards being played for: <br/>
+                    Cards being played for: 
+                    <br/>
                 </h4>
                 {cardList}
             </div>
@@ -117,7 +121,7 @@ class GoofBoard extends React.Component{
     }
 
     componentDidMount() {
-        httpGetAsync('/goofspiel/state' + formatParams({gameId: 0}), function(data) {
+        httpGetAsync('/goofspiel/state' + formatParams({gameId: gameNumber}), function(data) {
             this.setState({data: JSON.parse(data)});
         }.bind(this));
     }
@@ -133,7 +137,7 @@ class GoofBoard extends React.Component{
             postRequestBody,
             function(data) {
                 console.log("Played")
-                httpGetAsync('/goofspiel/state' + formatParams({gameId: 0}), function(data) {
+                httpGetAsync('/goofspiel/state' + formatParams({gameId: gameNumber}), function(data) {
                     this.setState({data: JSON.parse(data)});
                 }.bind(this));
         }.bind(this));
@@ -142,13 +146,21 @@ class GoofBoard extends React.Component{
     render() {
         var retVal 
         if (this.state.data) {
+            const styles = {
+                flex: '0 0 21%',
+                border: '1px solid black',
+                textAlign: 'center',
+                marginBottom: '1%',
+                marginRight: '1%'
+
+            };
             const zakWinnings = this.state.data.zak.cardsWon.map((number) =>
-                <div key={number.toString()}>
+                <div style={styles} key={number.toString()}>
                     {number}
                 </div>
             );
             const peterWinnings = this.state.data.peter.cardsWon.map((number) =>
-                <div key={number.toString()}>
+                <div style={styles} key={number.toString()}>
                     {number}
                 </div>
             );
@@ -165,7 +177,7 @@ class GoofBoard extends React.Component{
                 Zak
                 </h3>
                 Won Cards: <br/>
-                {zakWinnings}
+                <div style={{display: 'flex', justifyContent: 'flex-start', flexWrap: 'wrap'}}>{zakWinnings}</div>
                 Click a card to play
                 <CardList 
                     postCardChoice={(card) => this.postCardChoice('zak', card)} 
@@ -176,7 +188,8 @@ class GoofBoard extends React.Component{
                 Peter 
                 </h3>
                 Won Cards: <br/>
-                {peterWinnings}
+                <div style={{display: 'flex', justifyContent: 'flext-start', flexWrap: 'wrap'}}>{peterWinnings}</div>
+
                 Click a card to play
                 <CardList 
                     postCardChoice={(card) => this.postCardChoice('peter', card)} 
