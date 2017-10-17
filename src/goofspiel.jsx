@@ -90,16 +90,18 @@ class SidePanel extends React.Component{
         super(props)
     }
     render(){
-        const cardList = this.props.currentCards.map((number) =>
-            {if (isNumeric(number)) {
-                return 
+        console.log(this.props.currentCards)
+        var cardList
+        if(this.props.currentCards.length > 0 && isNumeric(this.props.currentCards[0])){
+            cardList = this.props.currentCards.map((number) =>
                     <h3 key={number.toString()}>
                         {number}
-                    </h3>
-            }else{
-                return <div> No cards </div>
-            }
-            });
+                    </h3>);
+        }else{
+            cardList = <div> No cards to play for</div> 
+        }
+        
+
         var retVal = 
             <div className={`col-md-2 col-md-offset-2`}>
                 <h4>
