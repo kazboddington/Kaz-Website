@@ -66,20 +66,23 @@ class CardList extends React.Component{
             cursor: 'pointer'
         }
         
-        const cardList = this.props.cards.map((number) =>
-            {if (isNumeric(number)) {
+        var cardList = <div>No more cards</div>
+        if (this.props.cards.length > 0){
+            cardList = this.props.cards.map((number) =>
+                {if (isNumeric(number)) {
 
-            return (
-                <div 
-                    onClick={(e) => this.handleClick(number, e)} 
-                    style={listItemStyle} 
-                    key={number.toString()}> 
-                {number} 
-                </div>)
-            }else{
-                return <div></div>
-            }}
-        );
+                return (
+                    <div 
+                        onClick={(e) => this.handleClick(number, e)} 
+                        style={listItemStyle} 
+                        key={number.toString()}> 
+                    {number} 
+                    </div>)
+                }else{
+                    return <div></div>
+                }}
+            );
+        }
         return <div style={listContainerStyle}>{cardList}</div>
     }
     
@@ -92,11 +95,17 @@ class SidePanel extends React.Component{
     render(){
         console.log(this.props.currentCards)
         var cardList
-        if(this.props.currentCards.length > 0 && isNumeric(this.props.currentCards[0])){
+        if(this.props.currentCards.length > 0){
             cardList = this.props.currentCards.map((number) =>
-                    <h3 key={number.toString()}>
-                        {number}
-                    </h3>);
+                    {   
+                    if (isNumeric(number)){
+                        return <h3 key={number.toString()}>
+                            {number}
+                        </h3>;
+                    }else{
+                        return <div key={number.toString()}>That card is not a number...</div>;
+                    }
+                    });
         }else{
             cardList = <div> No cards to play for</div> 
         }

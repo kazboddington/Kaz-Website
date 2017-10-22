@@ -21,7 +21,6 @@ app.get('/goofspiel', function (request, response){
     response.sendFile(path.resolve(__dirname, 'public', 'goofspiel.html'))
 })
 
-
 const results = []
 
 const newGameState = {
@@ -38,14 +37,14 @@ const newGameState = {
     currentCards: [],
     cardsToPlayFor:[1,2,3,4,5,6,7,8,9,10,11,12,13],
     gameId: 0
-    
+
 }
 
 function getNewGame(){
     var newGame = _.cloneDeep(newGameState)
     var newCard = newGame.cardsToPlayFor[ 
-                Math.floor( Math.random() * newGame.cardsToPlayFor.length)
-                ]; 
+        Math.floor( Math.random() * newGame.cardsToPlayFor.length)
+    ]; 
     _.pull(newGame.cardsToPlayFor, newCard)
     newGame.currentCards.push(newCard)
     if (gameState != undefined){
@@ -58,10 +57,10 @@ var gameState = getNewGame()
 
 app.get('/goofspiel/state', function (request, response){
     console.log(request.query)
-    
+
     if (request.query.gameId == undefined){
         // Did not request a specific game
-        response.send(JSON.stringify(getCleanState()))
+        response.send(JSON.stringify(getCleanState(gameState)))
         return
     }
 
@@ -74,16 +73,16 @@ app.get('/goofspiel/state', function (request, response){
     var id = parseInt(request.query.gameId)
     if (id < results.length){
         // requested valid game 
-        response.send(results[id])
+        response.send(getCleanState(results[id]))
     }else if (id == results.length){
-        response.send(getCleanState())
+        response.send(getCleanState(gameState))
     }else{
         response.send("You requested an invalid game: " + request.query.gameId)
     }
 })
 
 const requestFormat = 
-        `
+    `
         The format of the request should be:
         data = 
         {
@@ -92,7 +91,8 @@ const requestFormat =
         }
         Also remember to set the Content-Type to 'application/json'
         `
-function getCleanState(){
+function getCleanState(state){
+    var gameState = _.cloneDeep(state)
     var cleanState = {
         zak: {
             cardsToPlay: gameState.zak.cardsToPlay,
@@ -106,10 +106,10 @@ function getCleanState(){
         },
         currentCards: gameState.currentCards,
         cardsToPlayFor: gameState.cardsToPlayFor,
-        gameId: gameState.gameId
+        gameId: gameState.gameId,
+
     }
 
-     
     // Set the has bid variable
     if (gameState.zak.currentBid == null){
         cleanState.zak.hasBid = false
@@ -123,6 +123,9 @@ function getCleanState(){
         cleanState.peter.hasBid = true
     }
 
+    if (gameState.result != undefined && gameState.result.winner != undefined){
+        cleanState.result = {winner: gameState.result.winner} 
+    }
     return cleanState
 }
 function endGame(){
@@ -142,12 +145,12 @@ function endGame(){
 }
 
 function isNumeric(n) {
-  return !isNaN(parseFloat(n)) && isFinite(n);
+    return !isNaN(parseFloat(n)) && isFinite(n);
 }
 
 app.post('/goofspiel/bid', function(req, res){
     console.log("\n\n")
-    
+
     const body = req.body
     console.log(body) 
     console.log("\n GameState before is ")
@@ -208,7 +211,7 @@ app.post('/goofspiel/bid', function(req, res){
 
     // Now change the state
     player.currentBid = bid 
-    
+
     if(isNumeric(opponent.currentBid)){
         console.log("Moving the game on")
         // Move the game on! 
@@ -226,16 +229,19 @@ app.post('/goofspiel/bid', function(req, res){
         }
 
 
-        
+
         console.log("Completing move")
         _.pull(player.cardsToPlay, player.currentBid)
         _.pull(opponent.cardsToPlay, opponent.currentBid)
         player.currentBid = null
         opponent.currentBid = null
         var newCard = gameState.cardsToPlayFor[ 
-                    Math.floor( Math.random() * gameState.cardsToPlayFor.length)
-                ]; 
-        gameState.currentCards.push(newCard)                
+            Math.floor( Math.random() * gameState.cardsToPlayFor.length)
+        ]; 
+        if (newCard != null) {
+            gameState.currentCards.push(newCard)                
+        }
+
         _.pull(gameState.cardsToPlayFor, newCard)
 
         if(player.cardsToPlay.length == 0){
@@ -246,17 +252,17 @@ app.post('/goofspiel/bid', function(req, res){
         console.log("Waiting for other player to bid")
     }
 
-    
-    
-    var cleanState = getCleanState()
+
+
+    var cleanState = getCleanState(gameState)
     responseString += "\n" + JSON.stringify(cleanState)
-    
+
     res.set('Content-Type', 'text/plain')
     res.send(responseString)
-    
+
     console.log("\n GameState after is ")
     console.log(gameState)
-    
+
 })
 
 app.use(function (err, req, res, next) {
